@@ -1,0 +1,31 @@
+name: Build RSS HTML
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # každý den v 6:00 ráno UTC (8:00 CET)
+  workflow_dispatch:       # možnost spustit ručně
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run script
+        run: python rss_to_html.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
