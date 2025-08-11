@@ -1,32 +1,32 @@
-name: Generate RSS HTML
+name: Generate HTML from RSS
 
 on:
-  schedule:
-    - cron: "0 6 * * *"  # každý den v 6:00 ráno UTC (8:00 v ČR)
-  workflow_dispatch:      # umožní ruční spuštění
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.13'
+
+      - name: Install Czech locale
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y locales
+          sudo locale-gen cs_CZ.UTF-8
+          sudo update-locale LANG=cs_CZ.UTF-8
 
       - name: Install dependencies
-        run: pip install feedparser
+        run: pip install -r requirements.txt
 
       - name: Generate HTML from RSS
         run: python rss_to_html.py
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
-          publish_branch: gh-pages
-          keep_files: false
