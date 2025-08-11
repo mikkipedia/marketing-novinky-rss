@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # 👈 přidá možnost ručního spuštění
 
 jobs:
   build:
