@@ -64,14 +64,17 @@ for feed_url, (source_name, source_color) in FEEDS.items():
             "date_text": format_cz(dt),
             "date_color": date_tone(dt),
             "source": source_title,
-            "source_color": source_color,
-            "title_color": "#e5e7eb",
+            "source_color": source_color,  # barva zdroje
         })
         if dt and dt.date() >= cutoff_date:
             source_counts[source_name] += 1
 
-# Řazení
+# Řazení (nejnovější nahoře)
 items.sort(key=lambda x: x["dt"] or datetime.min, reverse=True)
+
+# Souhrny
+total_count = len(items)
+last3_total = sum(source_counts.values())
 
 # ====== HTML ======
 HTML_HEAD = f"""<!DOCTYPE html>
@@ -99,11 +102,18 @@ HTML_HEAD = f"""<!DOCTYPE html>
     color:var(--text);
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   }}
-  .wrap {{
-    max-width:1200px;
-    margin:0 auto;
-    padding:20px;
+  .wrap {{ max-width:1200px; margin:0 auto; padding:20px; }}
+
+  .summary {{
+    color: var(--muted);
+    font-size: .92rem;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: .75rem;
+    flex-wrap: wrap;
   }}
+
   .legend {{
     display:flex;
     gap:16px;
@@ -122,6 +132,7 @@ HTML_HEAD = f"""<!DOCTYPE html>
     border-radius:3px;
     flex-shrink:0;
   }}
+
   .grid {{
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -151,7 +162,7 @@ HTML_HEAD = f"""<!DOCTYPE html>
     letter-spacing:.02em;
     line-height:1.25;
     font-size:1.02rem;
-    color:#e5e7eb;
+    color:#e5e7eb; /* nadpis vždy světle šedý */
   }}
   .meta {{
     margin-top:auto;
@@ -162,21 +173,23 @@ HTML_HEAD = f"""<!DOCTYPE html>
     gap:.4rem;
     flex-wrap:wrap;
   }}
-  .dot::before {{
-    content:"•";
-    opacity:.45;
-    margin:0 .35rem;
-  }}
+  .dot::before {{ content:"•"; opacity:.45; margin:0 .35rem; }}
 </style>
 </head>
 <body>
 <div class="wrap">
   <!-- build: {BUILD_STAMP} -->
 
+  <div class="summary">
+    <span>Celkem: {total_count} článků</span>
+    <span>·</span>
+    <span>Poslední 3 dny: {last3_total}</span>
+  </div>
+
   <div class="legend">
 """
 
-# Legend items with counts
+# Legenda s počty za 3 dny
 legend_html = []
 for feed_url, (source_name, source_color) in FEEDS.items():
     count = source_counts[source_name]
