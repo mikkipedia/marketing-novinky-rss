@@ -30,3 +30,14 @@ jobs:
 
       - name: Generate HTML from RSS
         run: python rss_to_html.py
+
+      - name: Add CSS styling to HTML
+        run: |
+          CSS="<style>
+          body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; background: #fdfdfd; }
+          h1, h2, h3 { color: #333; }
+          a { color: #1a73e8; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+          .article { border-bottom: 1px solid #ddd; padding: 10px 0; }
+          </style>"
+          sed -i "s|</head>|$CSS</head>|" index.html
