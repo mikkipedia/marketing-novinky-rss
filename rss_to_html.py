@@ -4,6 +4,7 @@ import feedparser
 rss_list = [
     "https://www.mediaguru.cz/rss/",
     "https://www.mediar.cz/feed/",
+    "https://www.mam.cz/feed/",
 ]
 
 html = "<html><head><meta charset='utf-8'><title>Novinky z RSS</title></head><body>"
@@ -25,3 +26,4 @@ html += "</body></html>"
 # Uložení výsledku
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html)
+
