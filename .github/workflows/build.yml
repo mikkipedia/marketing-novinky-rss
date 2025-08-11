@@ -1,27 +1,26 @@
-name: Build RSS HTML
+name: Generate RSS HTML
 
 on:
   schedule:
-    - cron: "0 6 * * *"   # každý den v 6:00 ráno UTC (8:00 CET)
-  workflow_dispatch:       # možnost spustit ručně
+    - cron: "0 6 * * *"  # každý den v 6:00 ráno UTC (8:00 v ČR)
+  workflow_dispatch:      # umožní ruční spuštění
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install feedparser
 
-      - name: Run script
+      - name: Generate HTML from RSS
         run: python rss_to_html.py
 
       - name: Deploy to GitHub Pages
@@ -29,3 +28,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
+          publish_branch: gh-pages
+          keep_files: false
