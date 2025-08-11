@@ -47,6 +47,11 @@ def date_tone(dt):
         return "#a1a7ae"
     return "#6b7280"
 
+def hours_since(dt):
+    if not dt:
+        return 10_000  # velmi staré/neurčené
+    return int((datetime.utcnow() - dt).total_seconds() // 3600)
+
 # ====== SBĚR DAT ======
 items = []
 source_counts = {name: 0 for name, _ in FEEDS.values()}
@@ -61,10 +66,12 @@ for feed_url, (source_name, source_color) in FEEDS.items():
             "title": entry.get("title", "Bez názvu"),
             "link": entry.get("link", "#"),
             "dt": dt,
+            "age_h": hours_since(dt),
             "date_text": format_cz(dt),
             "date_color": date_tone(dt),
             "source": source_title,
-            "source_color": source_color,  # barva zdroje
+            "source_slug": source_name,     # pro data-source
+            "source_color": source_color,   # barva v meta a legendě
         })
         if dt and dt.date() >= cutoff_date:
             source_counts[source_name] += 1
@@ -93,115 +100,150 @@ HTML_HEAD = f"""<!DOCTYPE html>
     --card-border:#1f2730;
     --text:#e5e7eb;
     --muted:#94a3b8;
+    --accent:#2a3542;
   }}
   * {{ box-sizing: border-box; }}
   html,body {{
-    margin:0;
-    padding:0;
-    background:var(--bg);
-    color:var(--text);
+    margin:0; padding:0; background:var(--bg); color:var(--text);
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   }}
   .wrap {{ max-width:1200px; margin:0 auto; padding:20px; }}
 
-  .summary {{
-    color: var(--muted);
-    font-size: .92rem;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: flex-end;
-    gap: .75rem;
-    flex-wrap: wrap;
+  .topbar {{
+    display:flex; gap:16px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    margin-bottom:10px; color:var(--muted); font-size:.92rem;
+  }}
+  .summary {{ display:flex; gap:.75rem; flex-wrap:wrap; }}
+  .controls {{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }}
+  select {{
+    background:#0f1317; color:var(--text); border:1px solid var(--accent);
+    border-radius:10px; padding:8px 10px; font-size:.92rem;
   }}
 
-  .legend {{
-    display:flex;
-    gap:16px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
-    font-size:0.9rem;
+  .legend {{ display:flex; gap:10px; flex-wrap:wrap; margin:.35rem 0 16px; }}
+  .legend-btn {{
+    background:#0f1317; color:var(--text); border:1px solid var(--accent);
+    border-radius:999px; padding:6px 10px; font-size:.88rem; display:flex; align-items:center; gap:8px;
+    cursor:pointer; user-select:none; transition: border-color .15s, transform .12s;
   }}
-  .legend-item {{
-    display:flex;
-    align-items:center;
-    gap:6px;
-  }}
-  .legend-color {{
-    width:14px;
-    height:14px;
-    border-radius:3px;
-    flex-shrink:0;
-  }}
+  .legend-btn .dot {{ width:10px; height:10px; border-radius:999px; display:inline-block; }}
+  .legend-btn:hover {{ border-color:#3a4858; transform: translateY(-1px); }}
+  .legend-btn.active {{ border-color:#64748b; box-shadow:0 0 0 2px rgba(100,116,139,.25) inset; }}
 
   .grid {{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap:22px;
   }}
   .card {{
-    background:var(--card);
-    border:1px solid var(--card-border);
-    border-radius:14px;
-    padding:18px 16px;
-    min-height:160px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+    background:var(--card); border:1px solid var(--card-border); border-radius:14px;
+    padding:18px 16px; min-height:160px; display:flex; flex-direction:column; gap:10px;
     box-shadow: 0 6px 16px rgba(0,0,0,.25);
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }}
-  .card:hover {{
-    transform: translateY(-4px);
-    box-shadow: 0 10px 22px rgba(0,0,0,.32);
-    border-color:#2a3542;
-  }}
+  .card:hover {{ transform: translateY(-4px); box-shadow: 0 10px 22px rgba(0,0,0,.32); border-color:#2a3542; }}
   .title {{
-    text-decoration:none;
-    text-transform:uppercase;
-    font-weight:800;
-    letter-spacing:.02em;
-    line-height:1.25;
-    font-size:1.02rem;
-    color:#e5e7eb; /* nadpis vždy světle šedý */
+    text-decoration:none; text-transform:uppercase; font-weight:800; letter-spacing:.02em; line-height:1.25;
+    font-size:1.02rem; color:#e5e7eb;
   }}
   .meta {{
-    margin-top:auto;
-    font-family: Georgia, 'Times New Roman', serif;
-    font-style: italic;
-    font-size:.88rem;
-    display:flex;
-    gap:.4rem;
-    flex-wrap:wrap;
+    margin-top:auto; font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size:.88rem;
+    display:flex; gap:.4rem; flex-wrap:wrap;
   }}
-  .dot::before {{ content:"•"; opacity:.45; margin:0 .35rem; }}
+  .dotsep::before {{ content:"•"; opacity:.45; margin:0 .35rem; }}
+
+  /* skrytí kartičky při filtru */
+  .hidden {{ display:none !important; }}
 </style>
 </head>
 <body>
 <div class="wrap">
   <!-- build: {BUILD_STAMP} -->
 
-  <div class="summary">
-    <span>Celkem: {total_count} článků</span>
-    <span>·</span>
-    <span>Poslední 3 dny: {last3_total}</span>
+  <div class="topbar">
+    <div class="summary">
+      <span>Celkem: {total_count} článků</span>
+      <span>·</span>
+      <span>Poslední 3 dny: {last3_total}</span>
+    </div>
+
+    <div class="controls">
+      <label for="ageFilter">Zobrazit:</label>
+      <select id="ageFilter" aria-label="Filtr dle stáří">
+        <option value="all" selected>Vše</option>
+        <option value="24">Posledních 24 h</option>
+        <option value="72">Poslední 3 dny</option>
+        <option value="168">Poslední týden</option>
+      </select>
+    </div>
   </div>
 
-  <div class="legend">
+  <div class="legend" role="group" aria-label="Filtr podle zdroje">
 """
 
-# Legenda s počty za 3 dny
+# Legenda (tlačítka) – výchozí aktivní = všechny
 legend_html = []
 for feed_url, (source_name, source_color) in FEEDS.items():
-    count = source_counts[source_name]
     legend_html.append(
-        f'<div class="legend-item"><div class="legend-color" style="background:{source_color};"></div>{source_name} ({count})</div>'
+        f'<button class="legend-btn active" type="button" data-source="{source_name}">'
+        f'<span class="dot" style="background:{source_color};"></span>{source_name}'
+        f'</button>'
     )
-
 HTML_LEGEND = "\n    ".join(legend_html) + "\n  </div>\n  <div class=\"grid\">"
 
 HTML_FOOT = """
   </div>
 </div>
+
+<script>
+(function() {
+  const cards = Array.from(document.querySelectorAll('.card'));
+  const legendButtons = Array.from(document.querySelectorAll('.legend-btn'));
+  const ageFilter = document.getElementById('ageFilter');
+
+  function getActiveSources() {
+    const active = legendButtons.filter(b => b.classList.contains('active')).map(b => b.dataset.source);
+    // když není aktivní žádný, bereme to jako "vše"
+    return active.length ? active : legendButtons.map(b => b.dataset.source);
+  }
+
+  function getAgeLimitHours() {
+    const val = ageFilter.value;
+    if (val === 'all') return Infinity;
+    const n = parseInt(val, 10);
+    return isNaN(n) ? Infinity : n;
+  }
+
+  function applyFilter() {
+    const activeSources = new Set(getActiveSources());
+    const limitH = getAgeLimitHours();
+
+    cards.forEach(card => {
+      const src = card.dataset.source;
+      const ageH = parseInt(card.dataset.ageh, 10) || 999999;
+      const matchSource = activeSources.has(src);
+      const matchAge = ageH <= limitH;
+      if (matchSource && matchAge) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  }
+
+  legendButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      applyFilter();
+    });
+  });
+
+  ageFilter.addEventListener('change', applyFilter);
+
+  // inicializace
+  applyFilter();
+})();
+</script>
+
 </body>
 </html>
 """
@@ -210,11 +252,11 @@ HTML_FOOT = """
 cards = []
 for it in items:
     cards.append(f"""
-    <div class="card">
+    <div class="card" data-source="{it['source_slug']}" data-ageh="{it['age_h']}">
       <a class="title" href="{it['link']}" target="_blank" rel="noopener">{it['title']}</a>
       <div class="meta">
         <span style="color:{it['date_color']};">{it['date_text']}</span>
-        <span class="dot"></span>
+        <span class="dotsep"></span>
         <span style="color:{it['source_color']};">{it['source']}</span>
       </div>
     </div>""")
