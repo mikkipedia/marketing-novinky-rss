@@ -1,61 +1,103 @@
 import feedparser
-import locale
 from datetime import datetime
 
-# Nastavení českého locale (pokud nefunguje, nastaví fallback)
-try:
-    locale.setlocale(locale.LC_TIME, 'cs_CZ.UTF-8')
-except locale.Error:
-    print("⚠️ Locale cs_CZ.UTF-8 není dostupné, používám výchozí.")
-    locale.setlocale(locale.LC_TIME, '')
+# URL RSS feedu
+RSS_URL = "https://www.mujweb.cz/rss.xml"
 
-# URL RSS kanálu
-RSS_URL = "https://www.example.com/rss.xml"
+# Výstupní HTML soubor
+OUTPUT_FILE = "index.html"
 
-# Stažení a parsování feedu
+# Načtení RSS
 feed = feedparser.parse(RSS_URL)
 
-# CSS styl
-CSS = """
-<style>
-    body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; background: #fdfdfd; }
-    h1 { text-align: center; color: #333; }
-    .article { border-bottom: 1px solid #ddd; padding: 10px 0; }
-    h2 { margin-bottom: 5px; }
-    a { color: #1a73e8; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .date { color: #888; font-size: 0.9em; }
-</style>
-"""
-
-# Vytvoření HTML obsahu
-html_content = f"""<html>
+# Začátek HTML
+html_content = """
+<!DOCTYPE html>
+<html lang="cs">
 <head>
-<meta charset="UTF-8">
-<title>{feed.feed.get('title', 'RSS Feed')}</title>
-{CSS}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: linear-gradient(90deg, #4e73df, #1cc88a);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        main {
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+        }
+        article {
+            background: white;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        a {
+            text-decoration: none;
+            color: #4e73df;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .date {
+            font-size: 0.9em;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
-<h1>{feed.feed.get('title', 'RSS Feed')}</h1>
+    <header>
+        <h1>RSS Feed</h1>
+    </header>
+    <main>
 """
 
+# Přidání položek z RSS
 for entry in feed.entries:
-    date_str = ""
-    if "published_parsed" in entry and entry.published_parsed:
-        date_str = datetime(*entry.published_parsed[:6]).strftime("%d. %B %Y")
+    title = entry.title
+    link = entry.link
+    published = entry.get("published", "")
+    if published:
+        try:
+            published = datetime.strptime(published, "%a, %d %b %Y %H:%M:%S %z")
+            published = published.strftime("%d.%m.%Y %H:%M")
+        except:
+            pass
+
+    summary = entry.get("summary", "")
 
     html_content += f"""
-    <div class="article">
-        <h2><a href="{entry.link}">{entry.title}</a></h2>
-        <div class="date">{date_str}</div>
-        <p>{entry.get('summary', '')}</p>
-    </div>
+        <article>
+            <h2><a href="{link}" target="_blank">{title}</a></h2>
+            <div class="date">{published}</div>
+            <p>{summary}</p>
+        </article>
     """
 
-html_content += "</body></html>"
+# Konec HTML
+html_content += """
+    </main>
+</body>
+</html>
+"""
 
-# Uložení do souboru
-with open("index.html", "w", encoding="utf-8") as f:
+# Uložení souboru
+with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(html_content)
 
-print("✅ HTML soubor vygenerován: index.html")
+print(f"HTML stránka byla vygenerována do {OUTPUT_FILE}")
