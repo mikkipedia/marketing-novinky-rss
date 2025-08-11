@@ -1,12 +1,12 @@
 import feedparser
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from urllib.parse import urlparse
 
 # ====== NASTAVENÍ ======
 FEEDS = {
-    "https://www.mediar.cz/feed/": "",
-    "https://mam.cz/feed/": "",
-    "https://www.mediaguru.cz/rss": "",
+    "https://www.mediar.cz/feed/": ("mediar.cz", "#facc15"),
+    "https://mam.cz/feed/": ("mam.cz", "#ef4444"),
+    "https://www.mediaguru.cz/rss": ("mediaguru.cz", "#67e8f9"),
 }
 OUTPUT_FILE = "index.html"
 PAGE_TITLE = "Marketing & Media – novinky"
@@ -47,24 +47,14 @@ def date_tone(dt):
         return "#a1a7ae"
     return "#6b7280"
 
-def source_color_for(url):
-    """Vrací barvu podle domény zdroje."""
-    domain = urlparse(url).hostname or ""
-    if "mam.cz" in domain:
-        return "#ef4444"   # červená
-    if "mediar.cz" in domain:
-        return "#facc15"   # žlutá
-    if "mediaguru.cz" in domain:
-        return "#67e8f9"   # světle zeleno-modrá
-    return "#94a3b8"       # default šedá
-
 # ====== SBĚR DAT ======
 items = []
-for feed_url in FEEDS.keys():
-    feed = feedparser.parse(feed_url)
-    source_title = feed.feed.get("title", urlparse(feed_url).hostname or "Neznámý zdroj")
-    src_color = source_color_for(feed_url)
+source_counts = {name: 0 for name, _ in FEEDS.values()}
+cutoff_date = date.today() - timedelta(days=3)
 
+for feed_url, (source_name, source_color) in FEEDS.items():
+    feed = feedparser.parse(feed_url)
+    source_title = feed.feed.get("title", source_name)
     for entry in getattr(feed, "entries", []):
         dt = to_datetime(entry)
         items.append({
@@ -74,9 +64,11 @@ for feed_url in FEEDS.keys():
             "date_text": format_cz(dt),
             "date_color": date_tone(dt),
             "source": source_title,
-            "source_color": src_color,          # barva zdroje
-            "title_color": "#e5e7eb",           # nadpis vždy světle šedý
+            "source_color": source_color,
+            "title_color": "#e5e7eb",
         })
+        if dt and dt.date() >= cutoff_date:
+            source_counts[source_name] += 1
 
 # Řazení
 items.sort(key=lambda x: x["dt"] or datetime.min, reverse=True)
@@ -98,7 +90,6 @@ HTML_HEAD = f"""<!DOCTYPE html>
     --card-border:#1f2730;
     --text:#e5e7eb;
     --muted:#94a3b8;
-    --source:#facc15;
   }}
   * {{ box-sizing: border-box; }}
   html,body {{
@@ -112,6 +103,24 @@ HTML_HEAD = f"""<!DOCTYPE html>
     max-width:1200px;
     margin:0 auto;
     padding:20px;
+  }}
+  .legend {{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+    font-size:0.9rem;
+  }}
+  .legend-item {{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }}
+  .legend-color {{
+    width:14px;
+    height:14px;
+    border-radius:3px;
+    flex-shrink:0;
   }}
   .grid {{
     display:grid;
@@ -142,6 +151,7 @@ HTML_HEAD = f"""<!DOCTYPE html>
     letter-spacing:.02em;
     line-height:1.25;
     font-size:1.02rem;
+    color:#e5e7eb;
   }}
   .meta {{
     margin-top:auto;
@@ -162,8 +172,19 @@ HTML_HEAD = f"""<!DOCTYPE html>
 <body>
 <div class="wrap">
   <!-- build: {BUILD_STAMP} -->
-  <div class="grid">
+
+  <div class="legend">
 """
+
+# Legend items with counts
+legend_html = []
+for feed_url, (source_name, source_color) in FEEDS.items():
+    count = source_counts[source_name]
+    legend_html.append(
+        f'<div class="legend-item"><div class="legend-color" style="background:{source_color};"></div>{source_name} ({count})</div>'
+    )
+
+HTML_LEGEND = "\n    ".join(legend_html) + "\n  </div>\n  <div class=\"grid\">"
 
 HTML_FOOT = """
   </div>
@@ -177,7 +198,7 @@ cards = []
 for it in items:
     cards.append(f"""
     <div class="card">
-      <a class="title" href="{it['link']}" target="_blank" rel="noopener" style="color:{it['title_color']};">{it['title']}</a>
+      <a class="title" href="{it['link']}" target="_blank" rel="noopener">{it['title']}</a>
       <div class="meta">
         <span style="color:{it['date_color']};">{it['date_text']}</span>
         <span class="dot"></span>
@@ -185,7 +206,7 @@ for it in items:
       </div>
     </div>""")
 
-html = HTML_HEAD + "\n".join(cards) + HTML_FOOT
+html = HTML_HEAD + HTML_LEGEND + "\n".join(cards) + HTML_FOOT
 
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(html)
