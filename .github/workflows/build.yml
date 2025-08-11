@@ -1,10 +1,9 @@
 name: Generate HTML from RSS
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:  # 👈 přidá možnost ručního spuštění
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,19 +11,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-
-      - name: Install Czech locale
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y locales
-          sudo locale-gen cs_CZ.UTF-8
-          sudo update-locale LANG=cs_CZ.UTF-8
+          python-version: "3.x"
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -32,8 +24,10 @@ jobs:
       - name: Generate HTML from RSS
         run: python rss_to_html.py
 
-      - name: Upload HTML artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: rss-html
-          path: index.html
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Auto-update HTML from RSS" || echo "No changes to commit"
+          git push
