@@ -1,111 +1,103 @@
 import feedparser
 from datetime import datetime
 
-# Seznam RSS zdrojů (oddělené čárkou)
+# RSS zdroje
 rss_list = [
     "https://www.mediar.cz/feed/",
     "https://mam.cz/feed/",
-    "https://www.mediaguru.cz/rss/"
+    "https://www.mediaguru.cz/rss"
 ]
 
-# Načtení dat
-articles = []
-for rss_url in rss_list:
-    feed = feedparser.parse(rss_url)
+feeds = []
+for url in rss_list:
+    feed = feedparser.parse(url)
     for entry in feed.entries:
-        published = ""
-        if hasattr(entry, "published"):
-            try:
-                published = datetime(*entry.published_parsed[:6]).strftime("%d.%m.%Y")
-            except:
-                published = ""
-        articles.append({
+        feeds.append({
             "title": entry.title,
             "link": entry.link,
-            "summary": getattr(entry, "summary", ""),
-            "source": feed.feed.title,
-            "published": published
+            "date": entry.published if "published" in entry else "",
+            "source": feed.feed.title
         })
 
-# Seřadit podle data (pokud je k dispozici)
-articles.sort(key=lambda x: x["published"], reverse=True)
+# Seřadit podle data (novější nahoře)
+feeds.sort(key=lambda x: x["date"], reverse=True)
 
-# HTML výstup s designem
-html_content = """<!DOCTYPE html>
+# HTML výstup
+html = """
+<!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Marketing Novinky RSS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing & Media RSS</title>
+<style>
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f9fafb;
-      color: #1f2937;
-      margin: 0;
-      padding: 2rem;
+        background-color: #121212;
+        color: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+        padding: 20px;
     }
-    h1 {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 2rem;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      display: grid;
-      gap: 1.5rem;
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
     }
     .card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
     }
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-5px);
     }
-    .card a {
-      text-decoration: none;
-      color: #2563eb;
-      font-weight: 600;
+    .title {
+        font-family: 'Segoe UI', sans-serif;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+        color: #ffffff;
+        text-decoration: none;
     }
-    .card p {
-      margin: 0.5rem 0 0;
-      color: #4b5563;
+    .title:hover {
+        color: #1db954;
     }
     .meta {
-      font-size: 0.85rem;
-      color: #6b7280;
-      margin-bottom: 0.5rem;
+        font-family: Georgia, serif;
+        font-style: italic;
+        color: #bbbbbb;
+        font-size: 0.9em;
+        margin-top: auto;
     }
-  </style>
+</style>
 </head>
 <body>
-  <h1>Marketing Novinky RSS</h1>
-  <div class="container">
+<div class="grid">
 """
 
-# Přidání článků
-for article in articles:
-    html_content += f"""
+for item in feeds:
+    html += f"""
     <div class="card">
-      <div class="meta">{article["source"]} • {article["published"]}</div>
-      <a href="{article["link"]}" target="_blank">{article["title"]}</a>
-      <p>{article["summary"][:150]}...</p>
+        <a class="title" href="{item['link']}" target="_blank">{item['title']}</a>
+        <div class="meta">{item['date']} | {item['source']}</div>
     </div>
     """
 
-# Uzavření HTML
-html_content += """
-  </div>
+html += """
+</div>
 </body>
 </html>
 """
 
 # Uložení souboru
 with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
+    f.write(html)
+
+print("HTML stránka byla vygenerována jako index.html")

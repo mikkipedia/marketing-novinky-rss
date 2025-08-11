@@ -1,242 +1,211 @@
+
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Marketing Novinky RSS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing & Media RSS</title>
+<style>
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f9fafb;
-      color: #1f2937;
-      margin: 0;
-      padding: 2rem;
+        background-color: #121212;
+        color: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+        padding: 20px;
     }
-    h1 {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 2rem;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      display: grid;
-      gap: 1.5rem;
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
     }
     .card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
     }
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-5px);
     }
-    .card a {
-      text-decoration: none;
-      color: #2563eb;
-      font-weight: 600;
+    .title {
+        font-family: 'Segoe UI', sans-serif;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+        color: #ffffff;
+        text-decoration: none;
     }
-    .card p {
-      margin: 0.5rem 0 0;
-      color: #4b5563;
+    .title:hover {
+        color: #1db954;
     }
     .meta {
-      font-size: 0.85rem;
-      color: #6b7280;
-      margin-bottom: 0.5rem;
+        font-family: Georgia, serif;
+        font-style: italic;
+        color: #bbbbbb;
+        font-size: 0.9em;
+        margin-top: auto;
     }
-  </style>
+</style>
 </head>
 <body>
-  <h1>Marketing Novinky RSS</h1>
-  <div class="container">
+<div class="grid">
 
     <div class="card">
-      <div class="meta">MAM • 11.08.2025</div>
-      <a href="https://www.mam.cz/novinky/komunita-a-lide/2025-08/pavel-zizka-vede-obchod-software602-tyna-kaucka-marketing/" target="_blank">Pavel Žižka vede obchod Software602, Týna Kaucká marketing</a>
-      <p><p>Novým ředitelem obchodního oddělení eCommerce společnosti Software602 se stal Pavel Žižka, který dosud vedl oddělení marketingu této společnosti. <...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/sobotni-vecerni-jednickou-se-stal-tesne-polda-pred-zazraky-prirody/" target="_blank">Sobotní večerní jedničkou se stal těsně Polda před Zázraky přírody</a>
+        <div class="meta">Sun, 10 Aug 2025 08:05:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MAM • 11.08.2025</div>
-      <a href="https://www.mam.cz/novinky/kreativita-a-kampane/2025-08/spolecnost-vivo-startuje-s-agenturou-woo-prvni-velkou-influencer-kampan/" target="_blank">Společnost vivo startuje s agenturou WOO první velkou influencer kampaň</a>
-      <p><p>Kampaň je prvním uceleným vstupem značky vivo do influencer marketingu v Česku.</p>
-<p>Článek <a href="https://www.mam.cz/novinky/kreativita-a-kamp...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/prulom-barb-zjistuje-i-sledovanost-youtube-kanalu-na-tv/" target="_blank">Průlom: BARB zjišťuje i sledovanost YouTube kanálů na TV</a>
+        <div class="meta">Sun, 10 Aug 2025 06:50:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MAM • 11.08.2025</div>
-      <a href="https://www.mam.cz/novinky/komunita-a-lide/2025-08/petra-kopecka-posiluje-msl-czech-republic/" target="_blank">Petra Kopecká posiluje MSL Czech Republic</a>
-      <p><p>Do PR agentury MSL Czech Republic, spadající pod Publicis Groupe, přichází Petra Kopecká. Nově v roli Head of Corporate PR povede tým, který se pri...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/t-mobile-s-influencery-motivuje-kampani-k-darovani-krve/" target="_blank">T-Mobile s influencery motivuje kampaní k darování krve</a>
+        <div class="meta">Sun, 10 Aug 2025 06:45:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MAM • 11.08.2025</div>
-      <a href="https://www.mam.cz/novinky/zadavatele-a-znacky/2025-08/spolecnost-dm-na-ceste-ke-klimaticke-neutralite/" target="_blank">Společnost dm na cestě ke klimatické neutralitě</a>
-      <p><p>Společnost dm poprvé představila Zprávu o udržitelnosti společnou pro všech 14 zemí skupiny dm. Stvrzuje v ní svůj cíl dosáhnout do roku 2045 čistý...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/prazdninove-patecni-vecery-patri-dal-vsechnoparty/" target="_blank">Prázdninové páteční večery patří dál Všechnopárty</a>
+        <div class="meta">Sat, 09 Aug 2025 08:40:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/petra-kopecka-nastupuje-do-msl-czech-republic/" target="_blank">Petra Kopecká nastupuje do MSL Czech Republic</a>
-      <p><p><img alt="Petra Kopeck&#225; nastupuje do MSL Czech Republic" src="https://mediagurucdneu.azureedge.net/media/i23gy155/petra-kopecka-msl-czech-repu...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/zaujmout-zakaznika-v-kamenne-prodejne-je-tezsi-nez-driv/" target="_blank">Zaujmout zákazníka v kamenné prodejně je těžší než dřív</a>
+        <div class="meta">Sat, 09 Aug 2025 08:30:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/prima-na-podzim-nocni-operater-zradci-bez-litosti-i-tituly-viaplay/" target="_blank">Prima+ na podzim: Noční operatér, Zrádci, Bez lítosti i tituly Viaplay</a>
-      <p><p><img alt="Prima+ na podzim: Nočn&#237; operat&#233;r, Zr&#225;dci, Bez l&#237;tosti i tituly Viaplay" src="https://mediagurucdneu.azureedge.net/med...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/07/bezplatne-obdoby-stanic-spektrum-home-a-cs-mystery-v-plexu/" target="_blank">Bezplatné obdoby stanic Spektrum Home a CS Mystery v Plexu</a>
+        <div class="meta">Sat, 09 Aug 2025 08:25:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/canal-a-nova-se-dohodly-na-zpristupneni-vsech-sportovnich-stanic/" target="_blank">Canal+ a Nova se dohodly na zpřístupnění všech sportovních stanic</a>
-      <p><p><img alt="Canal+ a Nova se dohodly na zpř&#237;stupněn&#237; všech sportovn&#237;ch stanic" src="https://mediagurucdneu.azureedge.net/media/21970/z...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/petra-kopecka-nastupuje-do-msl-czech-republic/" target="_blank">Petra Kopecká nastupuje do MSL Czech Republic</a>
+        <div class="meta">Mon, 11 Aug 2025 17:05:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/skylink-zarazuje-od-utery-nova-sport-6-kompletuje-nabidku/" target="_blank">Skylink zařazuje od úterý Nova Sport 6, kompletuje nabídku</a>
-      <p><p><img alt="Skylink zařazuje od &#250;ter&#253; Nova Sport 6, kompletuje nab&#237;dku" src="https://mediagurucdneu.azureedge.net/media/gz5b2uig/nova-...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/prima-na-podzim-nocni-operater-zradci-bez-litosti-i-tituly-viaplay/" target="_blank">Prima+ na podzim: Noční operatér, Zrádci, Bez lítosti i tituly Viaplay</a>
+        <div class="meta">Mon, 11 Aug 2025 14:10:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/vivo-vstupuje-do-influencer-marketingu-spolupracuje-s-woo/" target="_blank">Vivo vstupuje do influencer marketingu, spolupracuje s WOO</a>
-      <p><p><img alt="Vivo vstupuje do influencer marketingu, spolupracuje s WOO" src="https://mediagurucdneu.azureedge.net/media/43bhtmvi/vivo.jpg?v=1" style=...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/canal-a-nova-se-dohodly-na-zpristupneni-vsech-sportovnich-stanic/" target="_blank">Canal+ a Nova se dohodly na zpřístupnění všech sportovních stanic</a>
+        <div class="meta">Mon, 11 Aug 2025 12:00:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/cesko-vysle-do-boje-o-oscara-snimek-jeste-nejsem-kym-chci-byt/" target="_blank">Česko vyšle do boje o Oscara snímek Ještě nejsem, kým chci být</a>
-      <p><p><img alt="Česko vyšle do boje o Oscara sn&#237;mek Ještě nejsem, k&#253;m chci b&#253;t" src="https://mediagurucdneu.azureedge.net/media/wexhimoj/j...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/skylink-zarazuje-od-utery-nova-sport-6-kompletuje-nabidku/" target="_blank">Skylink zařazuje od úterý Nova Sport 6, kompletuje nabídku</a>
+        <div class="meta">Mon, 11 Aug 2025 11:35:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/policie-modrava-potvrzuje-pozici-jednicky-nedelniho-dne/" target="_blank">Policie Modrava potvrzuje pozici jedničky nedělního dne</a>
-      <p><p><img alt="Policie Modrava potvrzuje pozici jedničky neděln&#237;ho dne" src="https://mediagurucdneu.azureedge.net/media/22299/policie-modrava-2022_...</p>
+        <a class="title" href="https://www.mam.cz/novinky/komunita-a-lide/2025-08/pavel-zizka-vede-obchod-software602-tyna-kaucka-marketing/" target="_blank">Pavel Žižka vede obchod Software602, Týna Kaucká marketing</a>
+        <div class="meta">Mon, 11 Aug 2025 11:32:09 +0000 | MAM</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/hbo-max-zacne-od-zari-zprisnovat-moznosti-sdilenych-pristupu/" target="_blank">HBO Max začne od září zpřísňovat možnosti sdílených přístupů</a>
-      <p><p><img alt="HBO Max začne od z&#225;ř&#237; zpř&#237;sňovat možnosti sd&#237;len&#253;ch př&#237;stupů" src="https://mediagurucdneu.azureedge.net/med...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/vivo-vstupuje-do-influencer-marketingu-spolupracuje-s-woo/" target="_blank">Vivo vstupuje do influencer marketingu, spolupracuje s WOO</a>
+        <div class="meta">Mon, 11 Aug 2025 11:00:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/moznost-propagace-primo-na-alza-cz-je-pro-znacky-klicova/" target="_blank">Možnost propagace přímo na Alza.cz je pro značky klíčová</a>
-      <p><p><img alt="Možnost propagace př&#237;mo na Alza.cz je pro značky kl&#237;čov&#225;" src="https://mediagurucdneu.azureedge.net/media/xf1ckyf1/martin-...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/cesko-vysle-do-boje-o-oscara-snimek-jeste-nejsem-kym-chci-byt/" target="_blank">Česko vyšle do boje o Oscara snímek Ještě nejsem, kým chci být</a>
+        <div class="meta">Mon, 11 Aug 2025 09:50:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/ctk-se-stala-radnym-clenem-organizace-vydavatelu-cuv/" target="_blank">ČTK se stala řádným členem organizace vydavatelů ČUV</a>
-      <p><p><img alt="ČTK se stala ř&#225;dn&#253;m členem organizace vydavatelů ČUV" src="https://mediagurucdneu.azureedge.net/media/8408/ctk_tistene-a-online...</p>
+        <a class="title" href="https://www.mam.cz/novinky/kreativita-a-kampane/2025-08/spolecnost-vivo-startuje-s-agenturou-woo-prvni-velkou-influencer-kampan/" target="_blank">Společnost vivo startuje s agenturou WOO první velkou influencer kampaň</a>
+        <div class="meta">Mon, 11 Aug 2025 09:27:48 +0000 | MAM</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 11.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/evropa-2-porada-sedmy-rocnik-detskeho-tabora-summer-camp/" target="_blank">Evropa 2 pořádá sedmý ročník dětského tábora Summer Camp</a>
-      <p><p><img alt="Evropa 2 poř&#225;d&#225; sedm&#253; ročn&#237;k dětsk&#233;ho t&#225;bora Summer Camp" src="https://mediagurucdneu.azureedge.net/media/x...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/policie-modrava-potvrzuje-pozici-jednicky-nedelniho-dne/" target="_blank">Policie Modrava potvrzuje pozici jedničky nedělního dne</a>
+        <div class="meta">Mon, 11 Aug 2025 08:10:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 10.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/sobotni-vecerni-jednickou-se-stal-tesne-polda-pred-zazraky-prirody/" target="_blank">Sobotní večerní jedničkou se stal těsně Polda před Zázraky přírody</a>
-      <p><p><img alt="Sobotn&#237; večern&#237; jedničkou se stal těsně Polda před Z&#225;zraky př&#237;rody" src="https://mediagurucdneu.azureedge.net/media/9...</p>
+        <a class="title" href="https://www.mam.cz/novinky/komunita-a-lide/2025-08/petra-kopecka-posiluje-msl-czech-republic/" target="_blank">Petra Kopecká posiluje MSL Czech Republic</a>
+        <div class="meta">Mon, 11 Aug 2025 08:02:01 +0000 | MAM</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 10.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/prulom-barb-zjistuje-i-sledovanost-youtube-kanalu-na-tv/" target="_blank">Průlom: BARB zjišťuje i sledovanost YouTube kanálů na TV</a>
-      <p><p><img alt="Průlom: BARB zjišťuje i sledovanost YouTube kan&#225;lů na TV" src="https://mediagurucdneu.azureedge.net/media/ub1jmtdx/youtube-ion-telev...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/hbo-max-zacne-od-zari-zprisnovat-moznosti-sdilenych-pristupu/" target="_blank">HBO Max začne od září zpřísňovat možnosti sdílených přístupů</a>
+        <div class="meta">Mon, 11 Aug 2025 07:25:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 10.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/t-mobile-s-influencery-motivuje-kampani-k-darovani-krve/" target="_blank">T-Mobile s influencery motivuje kampaní k darování krve</a>
-      <p><p><img alt="T-Mobile s influencery motivuje kampan&#237; k darov&#225;n&#237; krve" src="https://mediagurucdneu.azureedge.net/media/u4ubkz1w/dej-ob%C...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/moznost-propagace-primo-na-alza-cz-je-pro-znacky-klicova/" target="_blank">Možnost propagace přímo na Alza.cz je pro značky klíčová</a>
+        <div class="meta">Mon, 11 Aug 2025 07:20:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 09.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/prazdninove-patecni-vecery-patri-dal-vsechnoparty/" target="_blank">Prázdninové páteční večery patří dál Všechnopárty</a>
-      <p><p><img alt="Pr&#225;zdninov&#233; p&#225;tečn&#237; večery patř&#237; d&#225;l Všechnop&#225;rty" src="https://mediagurucdneu.azureedge.net/media/246...</p>
+        <a class="title" href="https://www.mam.cz/novinky/zadavatele-a-znacky/2025-08/spolecnost-dm-na-ceste-ke-klimaticke-neutralite/" target="_blank">Společnost dm na cestě ke klimatické neutralitě</a>
+        <div class="meta">Mon, 11 Aug 2025 07:15:48 +0000 | MAM</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 09.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/zaujmout-zakaznika-v-kamenne-prodejne-je-tezsi-nez-driv/" target="_blank">Zaujmout zákazníka v kamenné prodejně je těžší než dřív</a>
-      <p><p><img alt="Zaujmout z&#225;kazn&#237;ka v kamenn&#233; prodejně je těžš&#237; než dř&#237;v" src="https://mediagurucdneu.azureedge.net/media/banfivf...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/ctk-se-stala-radnym-clenem-organizace-vydavatelu-cuv/" target="_blank">ČTK se stala řádným členem organizace vydavatelů ČUV</a>
+        <div class="meta">Mon, 11 Aug 2025 07:15:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 09.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/07/bezplatne-obdoby-stanic-spektrum-home-a-cs-mystery-v-plexu/" target="_blank">Bezplatné obdoby stanic Spektrum Home a CS Mystery v Plexu</a>
-      <p><p><img alt="Bezplatn&#233; obdoby stanic Spektrum Home a CS Mystery v Plexu" src="https://mediagurucdneu.azureedge.net/media/23457/spektrum_home_amc....</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/evropa-2-porada-sedmy-rocnik-detskeho-tabora-summer-camp/" target="_blank">Evropa 2 pořádá sedmý ročník dětského tábora Summer Camp</a>
+        <div class="meta">Mon, 11 Aug 2025 07:10:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MAM • 08.08.2025</div>
-      <a href="https://www.mam.cz/novinky/kreativita-a-kampane/2025-08/dej-odber-t-mobile-spolu-s-influencery-a-ceskym-cervenym-krizem-motivuje-k-darovani-krve/" target="_blank">Dej odběr. T-Mobile spolu s influencery a Českým červeným křížem motivuje k darování krve</a>
-      <p><p>Léto je obdobím, kdy se v&#160;českých nemocnicích každoročně projevuje nedostatek krve i&#160;jejích dárců. T-Mobile proto ve spojení s&#160;český...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/unilever-navysil-investice-do-marketingu-rostly-take-trzby/" target="_blank">Unilever navýšil investice do marketingu, rostly také tržby</a>
+        <div class="meta">Fri, 08 Aug 2025 17:20:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MAM • 08.08.2025</div>
-      <a href="https://www.mam.cz/novinky/komunita-a-lide/2025-08/fanousci-harleye-se-bouri-proti-novemu-ceo/" target="_blank">Fanoušci Harleye se bouří proti novému CEO</a>
-      <p><p>Harley v minulých dnech oznámil změnu na nejvyšších místech - řízení společnosti přebírá od 1. října 2025 Artie Starrs. Zpráva vzbudila silné emoce...</p>
+        <a class="title" href="https://www.mam.cz/novinky/kreativita-a-kampane/2025-08/dej-odber-t-mobile-spolu-s-influencery-a-ceskym-cervenym-krizem-motivuje-k-darovani-krve/" target="_blank">Dej odběr. T-Mobile spolu s influencery a Českým červeným křížem motivuje k darování krve</a>
+        <div class="meta">Fri, 08 Aug 2025 14:09:16 +0000 | MAM</div>
     </div>
     
     <div class="card">
-      <div class="meta">MAM • 08.08.2025</div>
-      <a href="https://www.mam.cz/novinky/media-a-trh/2025-08/zradci-ovladnou-podzimni-vysilani-na-prime-inzerenti-se-perou-o-misto/" target="_blank">Zrádci ovládnou podzimní vysílání na Primě. Inzerenti se perou o místo</a>
-      <p><p>Televize Prima představila první část svého podzimního programu. Sázet bude na velké formáty i tradiční rodinné seriály. Na obrazovkách budou pokra...</p>
+        <a class="title" href="https://www.mam.cz/novinky/komunita-a-lide/2025-08/fanousci-harleye-se-bouri-proti-novemu-ceo/" target="_blank">Fanoušci Harleye se bouří proti novému CEO</a>
+        <div class="meta">Fri, 08 Aug 2025 13:29:58 +0000 | MAM</div>
     </div>
     
     <div class="card">
-      <div class="meta">MAM • 08.08.2025</div>
-      <a href="https://www.mam.cz/novinky/online-a-social/2025-08/openai-uvolnilo-nejnovejsi-model-chatbota-gpt-zameri-se-na-kod-zdravi-i-kreativni-psani/" target="_blank">OpenAI uvolnilo nejnovější model chatbota GPT. Zaměří se na kód, zdraví i kreativní psaní</a>
-      <p><p>GPT-5 cílí na programátory, ale také na kreativní odvětví. Míra halucinací je prý výrazně nižší proti předchozím modelům.</p>
-<p>Článek <a href="ht...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/zavoral-cesky-rozhlas-by-mel-byt-soucasti-krizove-infrastruktury-statu/" target="_blank">Zavoral: Český rozhlas by měl být součástí krizové infrastruktury státu</a>
+        <div class="meta">Fri, 08 Aug 2025 11:40:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MAM • 08.08.2025</div>
-      <a href="https://www.mam.cz/novinky/komunita-a-lide/2025-08/spolecnost-ikea-v-cesku-madarsku-a-na-slovensku-povede-erika-intiso/" target="_blank">Společnost IKEA v Česku, Maďarsku a na Slovensku povede Erika Intiso</a>
-      <p><p>Na pozici Country Retail Manager &#038; Chief Sustainability Officer pro IKEA Česká republika, Maďarsko a Slovensko byla od 1. září 2025 nově jmeno...</p>
+        <a class="title" href="https://www.mediaguru.cz/clanky/2025/08/alza-otevira-svuj-reklamni-system-alzaads-pro-dalsi-dodavatele/" target="_blank">Alza otevírá svůj reklamní systém alzaAds pro další dodavatele</a>
+        <div class="meta">Fri, 08 Aug 2025 10:55:00 GMT | MediaGuru</div>
     </div>
     
     <div class="card">
-      <div class="meta">MAM • 08.08.2025</div>
-      <a href="https://www.mam.cz/novinky/akce-a-souteze/2025-08/mate-inovativni-in-store-reseni-ktere-si-zaslouzi-pozornost-popai-awards-se-blizi/" target="_blank">Máte inovativní in-store řešení, které si zaslouží pozornost? POPAI AWARDS se blíží.</a>
-      <p><p>Nejprestižnější soutěž komunikačních projektů v retailu letos proběhne už po sedmnácté. Ocení nejkreativnější a nejefektivnější řešení za uplynulý ...</p>
+        <a class="title" href="https://www.mam.cz/novinky/media-a-trh/2025-08/zradci-ovladnou-podzimni-vysilani-na-prime-inzerenti-se-perou-o-misto/" target="_blank">Zrádci ovládnou podzimní vysílání na Primě. Inzerenti se perou o místo</a>
+        <div class="meta">Fri, 08 Aug 2025 08:17:35 +0000 | MAM</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 08.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/unilever-navysil-investice-do-marketingu-rostly-take-trzby/" target="_blank">Unilever navýšil investice do marketingu, rostly také tržby</a>
-      <p><p><img alt="Unilever nav&#253;šil investice do marketingu, rostly tak&#233; tržby" src="https://mediagurucdneu.azureedge.net/media/4608/unilever-1.jp...</p>
+        <a class="title" href="https://www.mam.cz/novinky/online-a-social/2025-08/openai-uvolnilo-nejnovejsi-model-chatbota-gpt-zameri-se-na-kod-zdravi-i-kreativni-psani/" target="_blank">OpenAI uvolnilo nejnovější model chatbota GPT. Zaměří se na kód, zdraví i kreativní psaní</a>
+        <div class="meta">Fri, 08 Aug 2025 07:44:08 +0000 | MAM</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 08.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/zavoral-cesky-rozhlas-by-mel-byt-soucasti-krizove-infrastruktury-statu/" target="_blank">Zavoral: Český rozhlas by měl být součástí krizové infrastruktury státu</a>
-      <p><p><img alt="Zavoral: Česk&#253; rozhlas by měl b&#253;t souč&#225;st&#237; krizov&#233; infrastruktury st&#225;tu" src="https://mediagurucdneu.azuree...</p>
+        <a class="title" href="https://www.mam.cz/novinky/komunita-a-lide/2025-08/spolecnost-ikea-v-cesku-madarsku-a-na-slovensku-povede-erika-intiso/" target="_blank">Společnost IKEA v Česku, Maďarsku a na Slovensku povede Erika Intiso</a>
+        <div class="meta">Fri, 08 Aug 2025 07:25:06 +0000 | MAM</div>
     </div>
     
     <div class="card">
-      <div class="meta">MediaGuru • 08.08.2025</div>
-      <a href="https://www.mediaguru.cz/clanky/2025/08/alza-otevira-svuj-reklamni-system-alzaads-pro-dalsi-dodavatele/" target="_blank">Alza otevírá svůj reklamní systém alzaAds pro další dodavatele</a>
-      <p><p><img alt="Alza otev&#237;r&#225; svůj reklamn&#237; syst&#233;m alzaAds pro dalš&#237; dodavatele" src="https://mediagurucdneu.azureedge.net/media/...</p>
+        <a class="title" href="https://www.mam.cz/novinky/akce-a-souteze/2025-08/mate-inovativni-in-store-reseni-ktere-si-zaslouzi-pozornost-popai-awards-se-blizi/" target="_blank">Máte inovativní in-store řešení, které si zaslouží pozornost? POPAI AWARDS se blíží.</a>
+        <div class="meta">Fri, 08 Aug 2025 07:12:19 +0000 | MAM</div>
     </div>
     
-  </div>
+</div>
 </body>
 </html>
