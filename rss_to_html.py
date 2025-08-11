@@ -49,7 +49,7 @@ def date_tone(dt):
 
 def hours_since(dt):
     if not dt:
-        return 10_000  # velmi staré/neurčené
+        return 10_000
     return int((datetime.utcnow() - dt).total_seconds() // 3600)
 
 # ====== SBĚR DAT ======
@@ -70,8 +70,8 @@ for feed_url, (source_name, source_color) in FEEDS.items():
             "date_text": format_cz(dt),
             "date_color": date_tone(dt),
             "source": source_title,
-            "source_slug": source_name,     # pro data-source
-            "source_color": source_color,   # barva v meta a legendě
+            "source_slug": source_name,
+            "source_color": source_color,
         })
         if dt and dt.date() >= cutoff_date:
             source_counts[source_name] += 1
@@ -101,6 +101,8 @@ HTML_HEAD = f"""<!DOCTYPE html>
     --text:#e5e7eb;
     --muted:#94a3b8;
     --accent:#2a3542;
+    --btn-bg:#0f1317;
+    --btn-active:#64748b;
   }}
   * {{ box-sizing: border-box; }}
   html,body {{
@@ -116,19 +118,28 @@ HTML_HEAD = f"""<!DOCTYPE html>
   .summary {{ display:flex; gap:.75rem; flex-wrap:wrap; }}
   .controls {{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }}
   select {{
-    background:#0f1317; color:var(--text); border:1px solid var(--accent);
+    background:var(--btn-bg); color:var(--text); border:1px solid var(--accent);
     border-radius:10px; padding:8px 10px; font-size:.92rem;
   }}
 
-  .legend {{ display:flex; gap:10px; flex-wrap:wrap; margin:.35rem 0 16px; }}
+  .legend {{ display:flex; gap:10px; flex-wrap:wrap; margin:.35rem 0 12px; }}
   .legend-btn {{
-    background:#0f1317; color:var(--text); border:1px solid var(--accent);
+    background:var(--btn-bg); color:var(--text); border:1px solid var(--accent);
     border-radius:999px; padding:6px 10px; font-size:.88rem; display:flex; align-items:center; gap:8px;
     cursor:pointer; user-select:none; transition: border-color .15s, transform .12s;
   }}
   .legend-btn .dot {{ width:10px; height:10px; border-radius:999px; display:inline-block; }}
   .legend-btn:hover {{ border-color:#3a4858; transform: translateY(-1px); }}
-  .legend-btn.active {{ border-color:#64748b; box-shadow:0 0 0 2px rgba(100,116,139,.25) inset; }}
+  .legend-btn.active {{ border-color:var(--btn-active); box-shadow:0 0 0 2px rgba(100,116,139,.25) inset; }}
+
+  .bulk {{
+    display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;
+  }}
+  .bulk button {{
+    background:var(--btn-bg); color:var(--text); border:1px solid var(--accent);
+    border-radius:10px; padding:6px 10px; font-size:.88rem; cursor:pointer;
+  }}
+  .bulk button:hover {{ border-color:#3a4858; }}
 
   .grid {{
     display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -151,7 +162,6 @@ HTML_HEAD = f"""<!DOCTYPE html>
   }}
   .dotsep::before {{ content:"•"; opacity:.45; margin:0 .35rem; }}
 
-  /* skrytí kartičky při filtru */
   .hidden {{ display:none !important; }}
 </style>
 </head>
@@ -180,7 +190,7 @@ HTML_HEAD = f"""<!DOCTYPE html>
   <div class="legend" role="group" aria-label="Filtr podle zdroje">
 """
 
-# Legenda (tlačítka) – výchozí aktivní = všechny
+# Legenda (tlačítka)
 legend_html = []
 for feed_url, (source_name, source_color) in FEEDS.items():
     legend_html.append(
@@ -188,7 +198,16 @@ for feed_url, (source_name, source_color) in FEEDS.items():
         f'<span class="dot" style="background:{source_color};"></span>{source_name}'
         f'</button>'
     )
-HTML_LEGEND = "\n    ".join(legend_html) + "\n  </div>\n  <div class=\"grid\">"
+HTML_LEGEND = "\n    ".join(legend_html) + """
+  </div>
+
+  <div class="bulk">
+    <button id="selectAll" type="button">Vybrat vše</button>
+    <button id="clearAll" type="button">Zrušit vše</button>
+  </div>
+
+  <div class="grid">
+"""
 
 HTML_FOOT = """
   </div>
@@ -199,10 +218,11 @@ HTML_FOOT = """
   const cards = Array.from(document.querySelectorAll('.card'));
   const legendButtons = Array.from(document.querySelectorAll('.legend-btn'));
   const ageFilter = document.getElementById('ageFilter');
+  const btnSelectAll = document.getElementById('selectAll');
+  const btnClearAll = document.getElementById('clearAll');
 
   function getActiveSources() {
     const active = legendButtons.filter(b => b.classList.contains('active')).map(b => b.dataset.source);
-    // když není aktivní žádný, bereme to jako "vše"
     return active.length ? active : legendButtons.map(b => b.dataset.source);
   }
 
@@ -222,11 +242,11 @@ HTML_FOOT = """
       const ageH = parseInt(card.dataset.ageh, 10) || 999999;
       const matchSource = activeSources.has(src);
       const matchAge = ageH <= limitH;
-      if (matchSource && matchAge) {
+      if (matchSource && matchAge) {{
         card.classList.remove('hidden');
-      } else {
+      }} else {{
         card.classList.add('hidden');
-      }
+      }}
     });
   }
 
@@ -235,6 +255,16 @@ HTML_FOOT = """
       btn.classList.toggle('active');
       applyFilter();
     });
+  });
+
+  btnSelectAll.addEventListener('click', () => {
+    legendButtons.forEach(b => b.classList.add('active'));
+    applyFilter();
+  });
+
+  btnClearAll.addEventListener('click', () => {
+    legendButtons.forEach(b => b.classList.remove('active'));
+    applyFilter();
   });
 
   ageFilter.addEventListener('change', applyFilter);
