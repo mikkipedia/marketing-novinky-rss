@@ -13,7 +13,7 @@ FEEDS = {
     "https://cc.cz/feed/": ("czechcrunch.cz", "#4ade80"),  # CzechCrunch – světle zelená
 }
 
-# URL, odkud se načítá předchozí HTML kvůli archivu
+# URL stránky s nasazeným HTML – kvůli načtení archivu
 ARCHIVE_URL = "https://mikkipedia.github.io/marketing-novinky-rss/"
 
 OUTPUT_FILE = "index.html"
@@ -26,7 +26,9 @@ CZ_MONTHS = [
     "července", "srpna", "září", "října", "listopadu", "prosince",
 ]
 
+
 def to_datetime(entry):
+    """Vrátí datetime z published/updated, jinak None."""
     for key in ("published_parsed", "updated_parsed"):
         val = getattr(entry, key, None)
         if val:
@@ -36,12 +38,16 @@ def to_datetime(entry):
                 pass
     return None
 
+
 def format_cz(dt):
+    """Datum ve formátu '11. srpna 2025, 08:15'."""
     if not dt:
         return ""
     return f"{dt.day}. {CZ_MONTHS[dt.month - 1]} {dt.year}, {dt:%H:%M}"
 
+
 def date_tone(dt):
+    """Barva datumu podle stáří."""
     if not dt:
         return "#9ca3af"
     diff = (date.today() - dt.date()).days
@@ -55,12 +61,16 @@ def date_tone(dt):
         return "#a1a7ae"
     return "#6b7280"
 
+
 def hours_since(dt):
+    """Počet hodin od publikace (pro filtr stáří)."""
     if not dt:
         return 10_000
     return int((datetime.utcnow() - dt).total_seconds() // 3600)
 
+
 def build_item(title, link, dt, source_title, source_slug, source_color):
+    """Normovaný záznam článku."""
     return {
         "title": title,
         "link": link,
@@ -73,16 +83,23 @@ def build_item(title, link, dt, source_title, source_slug, source_color):
         "source_color": source_color,
     }
 
+
 # ====== ARCHIV V HTML ======
 def load_archive():
-    """Načte archiv z předchozího HTML (script#archive-json) a vrátí list položek jako build_item()."""
+    """
+    Načte archiv z předchozího HTML (script#archive-json) a vrátí list položek build_item().
+    Pokud nic nenajde nebo se nepodaří stáhnout, vrací [].
+    """
     try:
         resp = requests.get(ARCHIVE_URL, timeout=5)
         if resp.status_code != 200:
             print(f"⚠️ Archiv: HTTP {resp.status_code}")
             return []
-        import re
-        m = re.search(r'<script id="archive-json"[^>]*>(.*?)</script>', resp.text, re.DOTALL)
+        m = re.search(
+            r'<script id="archive-json"[^>]*>(.*?)</script>',
+            resp.text,
+            re.DOTALL,
+        )
         if not m:
             return []
         raw = m.group(1).strip()
@@ -100,36 +117,45 @@ def load_archive():
                     pass
             if not dt:
                 continue
-            items.append(build_item(
-                entry.get("title", "Bez názvu"),
-                entry.get("link", "#"),
-                dt,
-                entry.get("source", entry.get("source_slug", "Neznámý zdroj")),
-                entry.get("source_slug", "neznamy"),
-                entry.get("source_color", "#94a3b8"),
-            ))
+            items.append(
+                build_item(
+                    entry.get("title", "Bez názvu"),
+                    entry.get("link", "#"),
+                    dt,
+                    entry.get("source", entry.get("source_slug", "Neznámý zdroj")),
+                    entry.get("source_slug", "neznamy"),
+                    entry.get("source_color", "#94a3b8"),
+                )
+            )
         print(f"ℹ️ Načteno z archivu: {len(items)} položek")
         return items
     except Exception as e:
         print("⚠️ Nepodařilo se načíst archiv:", e)
         return []
 
+
 def build_archive_json(items, cutoff_date):
-    """Vytvoří JSON pro uložení do <script id=archive-json> – jen položky v intervalu (>= cutoff_date)."""
+    """
+    Vytvoří JSON pro uložení do <script id=archive-json>.
+    Drží jen položky, které jsou >= cutoff_date (7 dní historie).
+    """
     data = []
     for it in items:
         dt = it.get("dt")
         if not dt or dt.date() < cutoff_date:
             continue
-        data.append({
-            "title": it["title"],
-            "link": it["link"],
-            "dt": it["dt"].isoformat(),
-            "source": it["source"],
-            "source_slug": it["source_slug"],
-            "source_color": it["source_color"],
-        })
+        data.append(
+            {
+                "title": it["title"],
+                "link": it["link"],
+                "dt": it["dt"].isoformat(),
+                "source": it["source"],
+                "source_slug": it["source_slug"],
+                "source_color": it["source_color"],
+            }
+        )
     return json.dumps(data, ensure_ascii=False, indent=2)
+
 
 # ====== SBĚR DAT (ARCHIV + RSS, POSLEDNÍCH 7 DNŮ) ======
 cutoff_date = date.today() - timedelta(days=7)
@@ -144,16 +170,18 @@ for feed_url, (source_name, source_color) in FEEDS.items():
         dt = to_datetime(entry)
         if not dt:
             continue
-        rss_items.append(build_item(
-            entry.get("title", "Bez názvu"),
-            entry.get("link", "#"),
-            dt,
-            source_title,
-            source_name,
-            source_color,
-        ))
+        rss_items.append(
+            build_item(
+                entry.get("title", "Bez názvu"),
+                entry.get("link", "#"),
+                dt,
+                source_title,
+                source_name,
+                source_color,
+            )
+        )
 
-# Sloučení archivu a RSS podle linku
+# Sloučení archivu a RSS podle linku (unikátní článek podle URL)
 merged_by_link = {}
 
 for it in archive_items:
@@ -182,18 +210,18 @@ for it in items:
 total_count = len(items)
 last7_total = len(items)
 
-# ====== HTML ======
-HTML_HEAD = f"""<!DOCTYPE html>
+# ====== HTML ŠABLONA (HEAD) ======
+HTML_HEAD_TEMPLATE = """<!DOCTYPE html>
 <html lang="cs">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{PAGE_TITLE}</title>
+<title>%%TITLE%%</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <style>
-  :root {{
+  :root {
     --bg:#0b0d10;
     --card:#14181d;
     --card-border:#1f2730;
@@ -202,77 +230,77 @@ HTML_HEAD = f"""<!DOCTYPE html>
     --accent:#2a3542;
     --btn-bg:#0f1317;
     --btn-active:#64748b;
-  }}
-  * {{ box-sizing: border-box; }}
-  html,body {{
+  }
+  * { box-sizing: border-box; }
+  html,body {
     margin:0; padding:0; background:var(--bg); color:var(--text);
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  }}
-  .wrap {{ max-width:1200px; margin:0 auto; padding:20px; }}
+  }
+  .wrap { max-width:1200px; margin:0 auto; padding:20px; }
 
-  .topbar {{
+  .topbar {
     display:flex; gap:16px; flex-wrap:wrap; align-items:center; justify-content:space-between;
     margin-bottom:10px; color:var(--muted); font-size:.92rem;
-  }}
-  .summary {{ display:flex; gap:.75rem; flex-wrap:wrap; }}
-  .controls {{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }}
-  select {{
+  }
+  .summary { display:flex; gap:.75rem; flex-wrap:wrap; }
+  .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  select {
     background:var(--btn-bg); color:var(--text); border:1px solid var(--accent);
     border-radius:10px; padding:8px 10px; font-size:.92rem;
-  }}
+  }
 
-  .legend {{ display:flex; gap:10px; flex-wrap:wrap; margin:.35rem 0 12px; }}
-  .legend-btn {{
+  .legend { display:flex; gap:10px; flex-wrap:wrap; margin:.35rem 0 12px; }
+  .legend-btn {
     background:var(--btn-bg); color:var(--text); border:1px solid var(--accent);
     border-radius:999px; padding:6px 10px; font-size:.88rem; display:flex; align-items:center; gap:8px;
     cursor:pointer; user-select:none; transition: border-color .15s, transform .12s;
-  }}
-  .legend-btn .dot {{ width:10px; height:10px; border-radius:999px; display:inline-block; }}
-  .legend-btn:hover {{ border-color:#3a4858; transform: translateY(-1px); }}
-  .legend-btn.active {{ border-color:var(--btn-active); box-shadow:0 0 0 2px rgba(100,116,139,.25) inset; }}
+  }
+  .legend-btn .dot { width:10px; height:10px; border-radius:999px; display:inline-block; }
+  .legend-btn:hover { border-color:#3a4858; transform: translateY(-1px); }
+  .legend-btn.active { border-color:var(--btn-active); box-shadow:0 0 0 2px rgba(100,116,139,.25) inset; }
 
-  .bulk {{
+  .bulk {
     display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;
-  }}
-  .bulk button {{
+  }
+  .bulk button {
     background:var(--btn-bg); color:var(--text); border:1px solid var(--accent);
     border-radius:10px; padding:6px 10px; font-size:.88rem; cursor:pointer;
-  }}
-  .bulk button:hover {{ border-color:#3a4858; }}
+  }
+  .bulk button:hover { border-color:#3a4858; }
 
-  .grid {{
+  .grid {
     display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap:22px;
-  }}
-  .card {{
+  }
+  .card {
     background:var(--card); border:1px solid var(--card-border); border-radius:14px;
     padding:18px 16px; min-height:160px; display:flex; flex-direction:column; gap:10px;
     box-shadow: 0 6px 16px rgba(0,0,0,.25);
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-  }}
-  .card:hover {{ transform: translateY(-4px); box-shadow: 0 10px 22px rgba(0,0,0,.32); border-color:#2a3542; }}
-  .title {{
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 10px 22px rgba(0,0,0,.32); border-color:#2a3542; }
+  .title {
     text-decoration:none; text-transform:uppercase; font-weight:800; letter-spacing:.02em; line-height:1.25;
     font-size:1.02rem; color:#e5e7eb;
-  }}
-  .meta {{
+  }
+  .meta {
     margin-top:auto; font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size:.88rem;
     display:flex; gap:.4rem; flex-wrap:wrap;
-  }}
-  .dotsep::before {{ content:"•"; opacity:.45; margin:0 .35rem; }}
+  }
+  .dotsep::before { content:"•"; opacity:.45; margin:0 .35rem; }
 
-  .hidden {{ display:none !important; }}
+  .hidden { display:none !important; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <!-- build: {BUILD_STAMP} -->
+  <!-- build: %%BUILD%% -->
 
   <div class="topbar">
     <div class="summary">
-      <span>Celkem: {total_count} článků</span>
+      <span>Celkem: %%TOTAL%% článků</span>
       <span>·</span>
-      <span>Posledních 7 dní: {last7_total}</span>
+      <span>Posledních 7 dní: %%LAST7%%</span>
     </div>
 
     <div class="controls">
@@ -289,26 +317,63 @@ HTML_HEAD = f"""<!DOCTYPE html>
   <div class="legend" role="group" aria-label="Filtr podle zdroje">
 """
 
-# Legenda (tlačítka) s počty
-legend_html = []
+HTML_HEAD = (
+    HTML_HEAD_TEMPLATE.replace("%%TITLE%%", PAGE_TITLE)
+    .replace("%%BUILD%%", BUILD_STAMP)
+    .replace("%%TOTAL%%", str(total_count))
+    .replace("%%LAST7%%", str(last7_total))
+)
+
+# ====== LEGENDA (TLAČÍTKA) ======
+legend_parts = []
 for feed_url, (source_name, source_color) in FEEDS.items():
     count = source_counts.get(source_name, 0)
-    legend_html.append(
+    legend_parts.append(
         f'<button class="legend-btn active" type="button" data-source="{source_name}">'
         f'<span class="dot" style="background:{source_color};"></span>{source_name} ({count})'
-        f'</button>'
+        f"</button>"
     )
-HTML_LEGEND = "\\n    ".join(legend_html) + """  
+
+HTML_LEGEND = "\n    ".join(legend_parts)
+
+# ====== OTEVŘENÍ BULK OVLÁDÁNÍ A GRIDU ======
+BULK_AND_GRID_OPEN = """
   </div>
 
-  <div class='bulk'>
-    <button id='selectAll' type='button'>Vybrat vše</button>
-    <button id='clearAll' type='button'>Zrušit vše</button>
+  <div class="bulk">
+    <button id="selectAll" type="button">Vybrat vše</button>
+    <button id="clearAll" type="button">Zrušit vše</button>
   </div>
 
-  <div class='grid'>
+  <div class="grid">
 """
 
+# ====== KARTY ======
+card_parts = []
+for it in items:
+    card_parts.append(
+        f"""
+    <div class="card" data-source="{it['source_slug']}" data-ageh="{it['age_h']}">
+      <a class="title" href="{it['link']}" target="_blank" rel="noopener">{it['title']}</a>
+      <div class="meta">
+        <span style="color:{it['date_color']};">{it['date_text']}</span>
+        <span class="dotsep"></span>
+        <span style="color:{it['source_color']};">{it['source']}</span>
+      </div>
+    </div>"""
+    )
+
+CARDS_HTML = "\n".join(card_parts)
+
+# ====== ARCHIV JSON BLOK ======
+archive_json = build_archive_json(items, cutoff_date)
+ARCHIVE_SCRIPT = f"""
+<script id="archive-json" type="application/json">
+{archive_json}
+</script>
+"""
+
+# ====== FOOTER S JS ======
 HTML_FOOT = """
   </div>
 </div>
@@ -378,32 +443,10 @@ HTML_FOOT = """
 </html>
 """
 
-# ====== GENEROVÁNÍ KARET ======
-cards = []
-for it in items:
-    cards.append(f"""
-    <div class="card" data-source="{it['source_slug']}" data-ageh="{it['age_h']}">
-      <a class="title" href="{it['link']}" target="_blank" rel="noopener">{it['title']}</a>
-      <div class="meta">
-        <span style="color:{it['date_color']};">{it['date_text']}</span>
-        <span class="dotsep"></span>
-        <span style="color:{it['source_color']};">{it['source']}</span>
-      </div>
-    </div>""")
-
-# JSON archiv pro uložení do HTML
-archive_json = build_archive_json(items, cutoff_date)
-ARCHIVE_SCRIPT = f"""
-<script id="archive-json" type="application/json">
-{archive_json}
-</script>
-"""
-
-html = HTML_HEAD + HTML_LEGEND + "\n".join(cards) + ARCHIVE_SCRIPT + HTML_FOOT
+# ====== SLOŽENÍ CELÉHO HTML ======
+html = HTML_HEAD + HTML_LEGEND + BULK_AND_GRID_OPEN + CARDS_HTML + ARCHIVE_SCRIPT + HTML_FOOT
 
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
 print(f"✅ Vygenerováno: {OUTPUT_FILE} (počet článků: {len(items)})")
-
-
