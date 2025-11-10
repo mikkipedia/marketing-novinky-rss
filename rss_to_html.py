@@ -399,11 +399,11 @@ ARCHIVE_SCRIPT = f"""
 </script>
 """
 
-html = HTML_HEAD + HTML_LEGEND + "
-".join(cards) + ARCHIVE_SCRIPT + HTML_FOOT
+html = HTML_HEAD + HTML_LEGEND + "\n".join(cards) + ARCHIVE_SCRIPT + HTML_FOOT
 
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
 print(f"✅ Vygenerováno: {OUTPUT_FILE} (počet článků: {len(items)})")
+
 
