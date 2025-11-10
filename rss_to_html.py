@@ -7,6 +7,7 @@ FEEDS = {
     "https://www.mediar.cz/feed/": ("mediar.cz", "#facc15"),
     "https://mam.cz/feed/": ("mam.cz", "#ef4444"),
     "https://www.mediaguru.cz/rss": ("mediaguru.cz", "#67e8f9"),
+    "https://cc.cz/feed/": ("czechcrunch.cz", "#4ade80"),  # CzechCrunch – světle zelená
 }
 OUTPUT_FILE = "index.html"
 PAGE_TITLE = "Marketing & Media – novinky"
@@ -52,16 +53,21 @@ def hours_since(dt):
         return 10_000
     return int((datetime.utcnow() - dt).total_seconds() // 3600)
 
-# ====== SBĚR DAT ======
+# ====== SBĚR DAT (JEN POSLEDNÍCH 7 DNŮ) ======
 items = []
 source_counts = {name: 0 for name, _ in FEEDS.values()}
-cutoff_date = date.today() - timedelta(days=3)
+cutoff_date = date.today() - timedelta(days=7)
 
 for feed_url, (source_name, source_color) in FEEDS.items():
     feed = feedparser.parse(feed_url)
     source_title = feed.feed.get("title", source_name)
+
     for entry in getattr(feed, "entries", []):
         dt = to_datetime(entry)
+        # ignoruj články bez data a starší než 7 dní
+        if not dt or dt.date() < cutoff_date:
+            continue
+
         items.append({
             "title": entry.get("title", "Bez názvu"),
             "link": entry.get("link", "#"),
@@ -73,7 +79,8 @@ for feed_url, (source_name, source_color) in FEEDS.items():
             "source_slug": source_name,
             "source_color": source_color,
         })
-        if dt and dt.date() >= cutoff_date:
+        # počty pro posledních 7 dní
+        if dt.date() >= cutoff_date:
             source_counts[source_name] += 1
 
 # Řazení (nejnovější nahoře)
@@ -81,7 +88,7 @@ items.sort(key=lambda x: x["dt"] or datetime.min, reverse=True)
 
 # Souhrny
 total_count = len(items)
-last3_total = sum(source_counts.values())
+last7_total = sum(source_counts.values())
 
 # ====== HTML ======
 HTML_HEAD = f"""<!DOCTYPE html>
@@ -173,7 +180,7 @@ HTML_HEAD = f"""<!DOCTYPE html>
     <div class="summary">
       <span>Celkem: {total_count} článků</span>
       <span>·</span>
-      <span>Poslední 3 dny: {last3_total}</span>
+      <span>Posledních 7 dní: {last7_total}</span>
     </div>
 
     <div class="controls">
@@ -195,7 +202,7 @@ legend_html = []
 for feed_url, (source_name, source_color) in FEEDS.items():
     legend_html.append(
         f'<button class="legend-btn active" type="button" data-source="{source_name}">'
-        f'<span class="dot" style="background:{source_color};"></span>{source_name}'
+        f'<span class="dot" style="background:{source_color};"></span>{source_name} ({source_counts[source_name]})'
         f'</button>'
     )
 HTML_LEGEND = "\n    ".join(legend_html) + """
@@ -242,11 +249,11 @@ HTML_FOOT = """
       const ageH = parseInt(card.dataset.ageh, 10) || 999999;
       const matchSource = activeSources.has(src);
       const matchAge = ageH <= limitH;
-      if (matchSource && matchAge) {{
+      if (matchSource && matchAge) {
         card.classList.remove('hidden');
-      }} else {{
+      } else {
         card.classList.add('hidden');
-      }}
+      }
     });
   }
 
