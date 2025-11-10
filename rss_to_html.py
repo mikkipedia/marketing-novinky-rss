@@ -298,16 +298,15 @@ for feed_url, (source_name, source_color) in FEEDS.items():
         f'<span class="dot" style="background:{source_color};"></span>{source_name} ({count})'
         f'</button>'
     )
-HTML_LEGEND = "
-    ".join(legend_html) + """
+HTML_LEGEND = "\\n    ".join(legend_html) + """  
   </div>
 
-  <div class="bulk">
-    <button id="selectAll" type="button">Vybrat vše</button>
-    <button id="clearAll" type="button">Zrušit vše</button>
+  <div class='bulk'>
+    <button id='selectAll' type='button'>Vybrat vše</button>
+    <button id='clearAll' type='button'>Zrušit vše</button>
   </div>
 
-  <div class="grid">
+  <div class='grid'>
 """
 
 HTML_FOOT = """
@@ -407,3 +406,4 @@ with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
 print(f"✅ Vygenerováno: {OUTPUT_FILE} (počet článků: {len(items)})")
+
