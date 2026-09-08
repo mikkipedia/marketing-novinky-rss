@@ -1,6 +1,5 @@
 import json
 import re
-import time
 import requests
 import feedparser
 from datetime import datetime, date, timedelta
@@ -49,26 +48,19 @@ def _get(url, referer=None, timeout=25):
 
 
 def _try_direct(url):
-    """Přímé stažení se session (cookies z homepage) a retry na 429."""
+    """Přímé stažení se session (cookies z homepage). Jeden pokus, bez retry."""
     base = f"https://{urlparse(url).netloc}/"
     try:
         SESSION.get(base, headers=HEADERS, timeout=20)
     except Exception:
         pass
-    for i, delay in enumerate((0, 8, 20)):
-        if delay:
-            time.sleep(delay)
-        try:
-            r = _get(url, referer=base)
-        except Exception as e:
-            print(f"   · primo (pokus {i + 1}): chyba – {e}")
-            return None
-        print(f"   · primo (pokus {i + 1}): HTTP {r.status_code}, {len(r.content)} B")
-        if r.status_code == 200:
-            return r.content
-        if r.status_code != 429:
-            return None
-    return None
+    try:
+        r = _get(url, referer=base)
+    except Exception as e:
+        print(f"   · primo: chyba – {e}")
+        return None
+    print(f"   · primo: HTTP {r.status_code}, {len(r.content)} B")
+    return r.content if r.status_code == 200 else None
 
 
 def _try_proxy(label, target):
