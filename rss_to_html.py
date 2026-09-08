@@ -3,7 +3,7 @@ import re
 import requests
 import feedparser
 from datetime import datetime, date, timedelta
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 
 # ====== NASTAVENÍ ======
 FEEDS = {
@@ -38,10 +38,34 @@ CZ_MONTHS = [
 
 
 def fetch_feed(url):
-    """Stáhne feed přes requests (s UA) a předá bytes feedparseru."""
-    resp = requests.get(url, headers=HEADERS, timeout=20, allow_redirects=True)
-    resp.raise_for_status()
-    return feedparser.parse(resp.content)
+    """
+    Stáhne feed. Zkusí postupně:
+      1) přímo (browser UA)
+      2) přes r.jina.ai
+      3) přes api.allorigins.win
+    Vrací první parsovaný feed, který obsahuje alespoň jednu položku.
+    """
+    attempts = [
+        ("primo", url),
+        ("r.jina.ai", "https://r.jina.ai/" + url),
+        ("allorigins", "https://api.allorigins.win/raw?url=" + quote(url, safe="")),
+    ]
+    last_err = "neznámá chyba"
+    for label, target in attempts:
+        try:
+            resp = requests.get(target, headers=HEADERS, timeout=25, allow_redirects=True)
+            print(f"   · {label}: HTTP {resp.status_code}, {len(resp.content)} B")
+            if resp.status_code != 200:
+                last_err = f"{label} → HTTP {resp.status_code}"
+                continue
+            parsed = feedparser.parse(resp.content)
+            if getattr(parsed, "entries", []):
+                return parsed
+            last_err = f"{label} → 0 položek"
+        except Exception as e:
+            last_err = f"{label} → {e}"
+            print(f"   · {label}: chyba – {e}")
+    raise RuntimeError(last_err)
 
 
 def to_datetime(entry):
@@ -181,6 +205,7 @@ archive_items = load_archive()
 
 rss_items = []
 for feed_url, (source_name, source_color) in FEEDS.items():
+    print(f"→ {source_name}")
     try:
         feed = fetch_feed(feed_url)
     except Exception as e:
