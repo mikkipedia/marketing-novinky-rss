@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 # ====== NASTAVENÍ ======
 FEEDS = {
     "https://www.mediar.cz/feed/": ("mediar.cz", "#facc15"),
-    "https://mam.cz/feed/": ("mam.cz", "#ef4444"),
+    "https://www.mam.cz/feed/": ("mam.cz", "#ef4444"),
     "https://www.mediaguru.cz/rss": ("mediaguru.cz", "#67e8f9"),
     "https://cc.cz/feed/": ("czechcrunch.cz", "#4ade80"),  # CzechCrunch – světle zelená
 }
@@ -20,11 +20,28 @@ OUTPUT_FILE = "index.html"
 PAGE_TITLE = "Marketing & Media – novinky"
 BUILD_STAMP = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
 
+# Hlavičky pro stahování feedů (feedparser sám posílá UA, který některé weby blokují)
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.7",
+    "Accept-Language": "cs,en;q=0.8",
+}
+
 # ====== POMOCNÉ FUNKCE ======
 CZ_MONTHS = [
     "ledna", "února", "března", "dubna", "května", "června",
     "července", "srpna", "září", "října", "listopadu", "prosince",
 ]
+
+
+def fetch_feed(url):
+    """Stáhne feed přes requests (s UA) a předá bytes feedparseru."""
+    resp = requests.get(url, headers=HEADERS, timeout=20, allow_redirects=True)
+    resp.raise_for_status()
+    return feedparser.parse(resp.content)
 
 
 def to_datetime(entry):
@@ -91,7 +108,7 @@ def load_archive():
     Pokud nic nenajde nebo se nepodaří stáhnout, vrací [].
     """
     try:
-        resp = requests.get(ARCHIVE_URL, timeout=5)
+        resp = requests.get(ARCHIVE_URL, headers=HEADERS, timeout=10)
         if resp.status_code != 200:
             print(f"⚠️ Archiv: HTTP {resp.status_code}")
             return []
@@ -164,9 +181,22 @@ archive_items = load_archive()
 
 rss_items = []
 for feed_url, (source_name, source_color) in FEEDS.items():
-    feed = feedparser.parse(feed_url)
+    try:
+        feed = fetch_feed(feed_url)
+    except Exception as e:
+        print(f"❌ {source_name}: stažení selhalo – {e}")
+        continue
+
+    if getattr(feed, "bozo", 0):
+        print(f"⚠️ {source_name}: bozo – {getattr(feed, 'bozo_exception', '')}")
+
+    entries = getattr(feed, "entries", [])
+    print(f"ℹ️ {source_name}: {len(entries)} položek ve feedu")
+    if not entries:
+        continue
+
     source_title = feed.feed.get("title", source_name)
-    for entry in getattr(feed, "entries", []):
+    for entry in entries:
         dt = to_datetime(entry)
         if not dt:
             continue
