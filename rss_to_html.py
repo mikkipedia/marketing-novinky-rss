@@ -1,5 +1,6 @@
 import json
 import re
+import time
 import requests
 import feedparser
 from datetime import datetime, date, timedelta
@@ -37,35 +38,86 @@ CZ_MONTHS = [
 ]
 
 
-def fetch_feed(url):
+SESSION = requests.Session()
+
+
+def _get(url, referer=None, timeout=25):
+    h = dict(HEADERS)
+    if referer:
+        h["Referer"] = referer
+    return SESSION.get(url, headers=h, timeout=timeout, allow_redirects=True)
+
+
+def _try_direct(url):
+    """Přímé stažení se session (cookies z homepage) a retry na 429."""
+    base = f"https://{urlparse(url).netloc}/"
+    try:
+        SESSION.get(base, headers=HEADERS, timeout=20)
+    except Exception:
+        pass
+    for i, delay in enumerate((0, 8, 20)):
+        if delay:
+            time.sleep(delay)
+        try:
+            r = _get(url, referer=base)
+        except Exception as e:
+            print(f"   · primo (pokus {i + 1}): chyba – {e}")
+            return None
+        print(f"   · primo (pokus {i + 1}): HTTP {r.status_code}, {len(r.content)} B")
+        if r.status_code == 200:
+            return r.content
+        if r.status_code != 429:
+            return None
+    return None
+
+
+def _try_proxy(label, target):
+    try:
+        r = _get(target)
+    except Exception as e:
+        print(f"   · {label}: chyba – {e}")
+        return None
+    print(f"   · {label}: HTTP {r.status_code}, {len(r.content)} B")
+    return r.content if r.status_code == 200 else None
+
+
+def _try_google_news(domain):
+    q = (
+        "https://news.google.com/rss/search?q=site:"
+        + domain
+        + "+when:7d&hl=cs&gl=CZ&ceid=CZ:cs"
+    )
+    return _try_proxy("google-news", q)
+
+
+def fetch_feed(url, domain):
     """
     Stáhne feed. Zkusí postupně:
-      1) přímo (browser UA)
-      2) přes r.jina.ai
-      3) přes api.allorigins.win
-    Vrací první parsovaný feed, který obsahuje alespoň jednu položku.
+      1) přímo (session + cookies + retry na 429)
+      2) codetabs proxy
+      3) allorigins proxy
+      4) r.jina.ai
+      5) Google News RSS (site:domena) – nouzová varianta
+    Vrací (parsed_feed, label_zdroje).
     """
     attempts = [
-        ("primo", url),
-        ("r.jina.ai", "https://r.jina.ai/" + url),
-        ("allorigins", "https://api.allorigins.win/raw?url=" + quote(url, safe="")),
+        ("primo", lambda: _try_direct(url)),
+        ("codetabs", lambda: _try_proxy(
+            "codetabs", "https://api.codetabs.com/v1/proxy/?quest=" + quote(url, safe=""))),
+        ("allorigins", lambda: _try_proxy(
+            "allorigins", "https://api.allorigins.win/raw?url=" + quote(url, safe=""))),
+        ("r.jina.ai", lambda: _try_proxy("r.jina.ai", "https://r.jina.ai/" + url)),
+        ("google-news", lambda: _try_google_news(domain)),
     ]
-    last_err = "neznámá chyba"
-    for label, target in attempts:
-        try:
-            resp = requests.get(target, headers=HEADERS, timeout=25, allow_redirects=True)
-            print(f"   · {label}: HTTP {resp.status_code}, {len(resp.content)} B")
-            if resp.status_code != 200:
-                last_err = f"{label} → HTTP {resp.status_code}"
-                continue
-            parsed = feedparser.parse(resp.content)
-            if getattr(parsed, "entries", []):
-                return parsed
-            last_err = f"{label} → 0 položek"
-        except Exception as e:
-            last_err = f"{label} → {e}"
-            print(f"   · {label}: chyba – {e}")
-    raise RuntimeError(last_err)
+    for label, fn in attempts:
+        raw = fn()
+        if not raw:
+            continue
+        parsed = feedparser.parse(raw)
+        if getattr(parsed, "entries", []):
+            return parsed, label
+        print(f"   · {label}: 0 položek po parsování")
+    raise RuntimeError("žádná z cest nevrátila použitelný feed")
 
 
 def to_datetime(entry):
@@ -207,27 +259,31 @@ rss_items = []
 for feed_url, (source_name, source_color) in FEEDS.items():
     print(f"→ {source_name}")
     try:
-        feed = fetch_feed(feed_url)
+        feed, via = fetch_feed(feed_url, source_name)
     except Exception as e:
         print(f"❌ {source_name}: stažení selhalo – {e}")
         continue
 
-    if getattr(feed, "bozo", 0):
-        print(f"⚠️ {source_name}: bozo – {getattr(feed, 'bozo_exception', '')}")
-
     entries = getattr(feed, "entries", [])
-    print(f"ℹ️ {source_name}: {len(entries)} položek ve feedu")
+    print(f"ℹ️ {source_name}: {len(entries)} položek (zdroj: {via})")
     if not entries:
         continue
 
-    source_title = feed.feed.get("title", source_name)
+    if via == "google-news":
+        source_title = source_name
+    else:
+        source_title = feed.feed.get("title", source_name)
+
     for entry in entries:
         dt = to_datetime(entry)
         if not dt:
             continue
+        title = entry.get("title", "Bez názvu")
+        if via == "google-news" and " - " in title:
+            title = title.rsplit(" - ", 1)[0]
         rss_items.append(
             build_item(
-                entry.get("title", "Bez názvu"),
+                title,
                 entry.get("link", "#"),
                 dt,
                 source_title,
